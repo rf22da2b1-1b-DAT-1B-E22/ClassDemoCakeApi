@@ -1,6 +1,7 @@
 ﻿using ClassDemoCakesLib.collection;
 using ClassDemoCakesLib.model;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -21,14 +22,25 @@ namespace ClassDemoCakeApi.Controllers
 
         // GET: api/<KagerController>
         [HttpGet]
-        public IEnumerable<Cake> Get()
+        // til dokumentation i swagger
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        public IActionResult Get()
         {
-            return _data.GetAll();
+            IEnumerable<Cake> cakes = _data.GetAll();
+
+            if (cakes.ToList().Count == 0)
+            {
+                return NoContent();
+            }
+            return Ok(cakes);
         }
 
         // GET api/<KagerController>/5
         [HttpGet]
         [Route("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public IActionResult Get(int id)
         {
             try
@@ -45,31 +57,64 @@ namespace ClassDemoCakeApi.Controllers
         // GET: api/<KagerController>
         [HttpGet]
         [Route("Wienerbrød")]
-        
-        public IEnumerable<Cake> GetWienerbroed(string kageType)
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        public IActionResult GetWienerbroed(string kageType)
         {
-            return _data.GetAll().ToList().FindAll(k=>k.Description.Contains("wienerbrød"));
+            // kan også lave en metode i repository'et
+
+            // Hack laver det bare her
+            IEnumerable<Cake> cakes = _data.GetAll().ToList().FindAll(k => k.Description.Contains("wienerbrød"));
+
+            if (cakes.ToList().Count == 0)
+            {
+                return NoContent();
+            }
+            return Ok(cakes);
         }
 
         // POST api/<KagerController>
         [HttpPost]
-        public void Post([FromBody] Cake value)
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        public IActionResult Post([FromBody] Cake value)
         {
-            _data.Add(value);
+            Cake cake =_data.Add(value);
+            return Created($"api/kager/{cake.Id}", cake);
         }
 
         // PUT api/<KagerController>/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] Cake value)
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public IActionResult Put(int id, [FromBody] Cake value)
         {
-            _data.Edit(id,value);
+            try
+            {
+                Cake cake = _data.Edit(id, value);
+                return Ok(cake);
+            }
+            catch (KeyNotFoundException knfe)
+            {
+                return NotFound();
+            }
         }
 
         // DELETE api/<KagerController>/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public IActionResult Delete(int id)
         {
-            _data.Delete(id);
+            try
+            {
+                Cake cake = _data.Delete(id);
+                return Ok(cake);
+            }
+            catch (KeyNotFoundException knfe)
+            {
+                return NotFound();
+            }
+
         }
     }
 }
