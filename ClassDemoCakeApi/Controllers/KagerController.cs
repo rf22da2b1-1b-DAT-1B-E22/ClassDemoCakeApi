@@ -27,10 +27,28 @@ namespace ClassDemoCakeApi.Controllers
         }
 
         // GET api/<KagerController>/5
-        [HttpGet("{id}")]
-        public Cake Get(int id)
+        [HttpGet]
+        [Route("{id}")]
+        public IActionResult Get(int id)
         {
-            return _data.GetById(id);
+            try
+            {
+                Cake cake = _data.GetById(id);
+                return Ok(cake);
+            }
+            catch (KeyNotFoundException knfe) { 
+                return NotFound();
+            }
+            
+        }
+
+        // GET: api/<KagerController>
+        [HttpGet]
+        [Route("Wienerbrød")]
+        
+        public IEnumerable<Cake> GetWienerbroed(string kageType)
+        {
+            return _data.GetAll().ToList().FindAll(k=>k.Description.Contains("wienerbrød"));
         }
 
         // POST api/<KagerController>
