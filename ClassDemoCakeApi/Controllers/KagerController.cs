@@ -54,6 +54,8 @@ namespace ClassDemoCakeApi.Controllers
             
         }
 
+        
+
         // GET: api/<KagerController>
         [HttpGet]
         [Route("Wienerbrød")]
@@ -72,6 +74,32 @@ namespace ClassDemoCakeApi.Controllers
             }
             return Ok(cakes);
         }
+
+        // GET: api/<KagerController>
+        [HttpGet]
+        [Route("Search")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        public IActionResult GetFilter([FromQuery] Filter2 filter)
+        {
+            // kan også lave en metode i repository'et
+
+            // Hack laver det bare her
+
+            List<Cake> cakes = _data.GetAll().ToList();
+
+            if (filter.MaxPris is not null) { 
+                cakes = cakes.FindAll(k => k.Price < filter.MaxPris);
+            }
+
+            if (cakes.ToList().Count == 0)
+            {
+                return NoContent();
+            }
+            return Ok(cakes);
+        }
+
+
 
         // POST api/<KagerController>
         [HttpPost]
@@ -118,3 +146,4 @@ namespace ClassDemoCakeApi.Controllers
         }
     }
 }
+
