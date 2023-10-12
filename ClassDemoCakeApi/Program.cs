@@ -9,6 +9,11 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddCors(option =>
+            option.AddPolicy("Allow All", 
+            builder => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader())
+            );
+
 builder.Services.AddSingleton<CakeRepositoryService>(new CakeRepositoryService(true));
 
 var app = builder.Build();
@@ -21,6 +26,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseAuthorization();
+
+app.UseCors("Allow All");
 
 app.MapControllers();
 
